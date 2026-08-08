@@ -1,5 +1,5 @@
 from langchain_experimental.text_splitter import SemanticChunker
-from langchain_openai import OpenAIEmbeddings  
+from langchain_ollama import OllamaEmbeddings  
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -23,7 +23,7 @@ New manufacturing techniques are being implemented to reduce costs."""
 
 # Semantic Chunker - groups by meaning, not structure
 semantic_splitter = SemanticChunker(
-    embeddings=OpenAIEmbeddings(),
+    embeddings=OllamaEmbeddings(model="nomic-embed-text"),
     breakpoint_threshold_type="percentile",  # or "standard_deviation"
     breakpoint_threshold_amount=70
 )

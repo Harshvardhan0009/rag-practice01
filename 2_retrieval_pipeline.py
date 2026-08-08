@@ -1,5 +1,5 @@
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -7,7 +7,7 @@ load_dotenv()
 persistent_directory = "db/chroma_db"
 
 # Load embeddings and vector store
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+embedding_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = Chroma(
     persist_directory=persistent_directory,
@@ -16,7 +16,7 @@ db = Chroma(
 )
 
 # Search for relevant documents
-query = "How much did Microsoft pay to acquire GitHub?"
+query = "what was nvidia's first graphics accelerator called?"
 
 retriever = db.as_retriever(search_kwargs={"k": 5})
 

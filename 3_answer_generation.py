@@ -1,7 +1,6 @@
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings, ChatOllama
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
 
@@ -10,7 +9,7 @@ load_dotenv()
 persistent_directory = "db/chroma_db"
 
 # Load embeddings and vector store
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+embedding_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = Chroma(
     persist_directory=persistent_directory,
@@ -49,8 +48,8 @@ Documents:
 Please provide a clear, helpful answer using only the information from these documents. If you can't find the answer in the documents, say "I don't have enough information to answer that question based on the provided documents."
 """
 
-# Create a ChatOpenAI model
-model = ChatOpenAI(model="gpt-4o")
+# Create a ChatOllama model
+model = ChatOllama(model="llama3.2")
 
 # Define the messages for the model
 messages = [

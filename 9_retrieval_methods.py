@@ -1,12 +1,12 @@
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Setup
 persistent_directory = "db/chroma_db"
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+embedding_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = Chroma(
     persist_directory=persistent_directory,

@@ -1,18 +1,18 @@
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 
 # Load environment variables
 load_dotenv()
 
 # Connect to your document database
 persistent_directory = "db/chroma_db"
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
 db = Chroma(persist_directory=persistent_directory, embedding_function=embeddings)
 
 # Set up AI model
-model = ChatOpenAI(model="gpt-4o")
+model = ChatOllama(model="llama3.2")
 
 # Store our conversation as messages
 chat_history = []

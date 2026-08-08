@@ -1,7 +1,7 @@
 import os
 from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from dotenv import load_dotenv
 
@@ -63,20 +63,27 @@ def split_documents(documents, chunk_size=1000, chunk_overlap=0):
     
     return chunks
 
-def create_vector_store(chunks, persist_directory="db/chroma_db"):
-    """Create and persist ChromaDB vector store"""
-    print("Creating embeddings and storing in ChromaDB...")
+def create_vector_store(chunks, persist_directory="db/chroma_db", batch_size=100):
+    """Create and persist ChromaDB vector store in batches"""
+    print("Creating embeddings and storing in ChromaDB in batches...")
         
-    embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+    embedding_model = OllamaEmbeddings(model="nomic-embed-text")
     
-    # Create ChromaDB vector store
-    print("--- Creating vector store ---")
-    vectorstore = Chroma.from_documents(
-        documents=chunks,
-        embedding=embedding_model,
-        persist_directory=persist_directory, 
+    # Initialize empty Chroma vector store
+    vectorstore = Chroma(
+        persist_directory=persist_directory,
+        embedding_function=embedding_model,
         collection_metadata={"hnsw:space": "cosine"}
     )
+    
+    total_batches = (len(chunks) + batch_size - 1) // batch_size
+    print(f"Adding {len(chunks)} chunks in {total_batches} batches of {batch_size}...")
+    
+    for i in range(0, len(chunks), batch_size):
+        batch = chunks[i:i + batch_size]
+        print(f"Processing batch {i//batch_size + 1}/{total_batches} ({len(batch)} chunks)...")
+        vectorstore.add_documents(batch)
+        
     print("--- Finished creating vector store ---")
     
     print(f"Vector store created and saved to {persist_directory}")
@@ -90,18 +97,19 @@ def main():
     docs_path = "docs"
     persistent_directory = "db/chroma_db"
     
-    # Check if vector store already exists
+    # Check if vector store already exists with documents
     if os.path.exists(persistent_directory):
-        print("✅ Vector store already exists. No need to re-process documents.")
-        
-        embedding_model = OpenAIEmbeddings(model="text-embedding-3-small")
+        embedding_model = OllamaEmbeddings(model="nomic-embed-text")
         vectorstore = Chroma(
             persist_directory=persistent_directory,
             embedding_function=embedding_model, 
             collection_metadata={"hnsw:space": "cosine"}
         )
-        print(f"Loaded existing vector store with {vectorstore._collection.count()} documents")
-        return vectorstore
+        if vectorstore._collection.count() > 0:
+            print("✅ Vector store already exists. No need to re-process documents.")
+            print(f"Loaded existing vector store with {vectorstore._collection.count()} documents")
+            return vectorstore
+        print("Vector store directory exists but is empty. Re-building...")
     
     print("Persistent directory does not exist. Initializing vector store...\n")
     
